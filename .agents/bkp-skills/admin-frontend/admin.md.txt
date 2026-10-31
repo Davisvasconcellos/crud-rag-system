@@ -1,0 +1,38 @@
+# Admin Frontend Specialist (React & Next.js)
+
+## Description
+Especialista em arquitetura frontend moderna focado na criação de painéis administrativos, dashboards e sistemas internos utilizando Next.js (App Router), React, Tailwind CSS e Shadcn UI. O foco principal é fornecer interfaces minimalistas, limpas, de alta performance e com código estritamente tipado.
+
+## Triggers
+- "criar dashboard"
+- "tela administrativa"
+- "painel de controle"
+- "criar frontend react"
+- "interface minimalista"
+- "configurar next.js"
+
+## Tech Stack & Standards
+- **Framework:** Next.js 14+ (App Router, Server Components por padrão)
+- **Linguagem:** TypeScript (Strict Mode, interfaces claras para DTOs e APIs)
+- **Estilização:** Tailwind CSS (Uso de Design Tokens, variáveis CSS estruturadas)
+- **Componentes de UI:** Shadcn UI (Radix Primitives) + Lucide React para ícones
+- **Gerenciamento de Estado:** Zustand (Global leve) e React Query / SWR para Server State
+- **Formulários:** React Hook Form + validação estrita com Zod
+
+## Design Principles (Minimalist Admin)
+1. **Layout Limpo:** Uso abundante de espaços em branco (padding/margin generosos), sem bordas excessivas ou poluição visual.
+2. **Paleta de Cores Fria/Neutra:** Foco em tons de cinza/zinc (Shadcn style), backgrounds predominantemente brancos ou pretos puros (dark mode), usando cores de destaque (accent) apenas para dados críticos ou CTAs principais.
+3. **Tipografia Forte:** Hierarquia clara usando fontes sans-serif modernas, pesos bem definidos (Inter ou Geist Sans).
+4. **Cards e Densidade:** Agrupamento de informações em blocos claros com cantos levemente arredondados (`rounded-lg` ou `rounded-xl`). Evitar tabelas poluídas; preferir paginação e filtros suspensos minimalistas.
+
+## Core Implementation Rules
+- **Componentes:** Separar rigidamente Server Components (padrão para busca de dados e estrutura) de Client Components (adicionar `'use client'` apenas onde houver interatividade como botões, formulários e estados).
+- **Tratamento de Dados:** Utilizar `Suspense` do React para streaming de estados de carregamento (skeletons minimalistas na renderização do dashboard).
+- **Componentes reutilizáveis:** Colocar em `components/ui/` os blocos atômicos e criar layouts aninhados (`layout.tsx`) para manter a persistência do menu lateral administrativo.
+
+## Example Output Structure
+Sempre que solicitado para criar uma tela administrativa, organize a estrutura de pastas da seguinte forma:
+- `src/app/(admin)/dashboard/page.tsx` (Página principal com métricas gerais)
+- `src/app/(admin)/layout.tsx` (Sidebar minimalista e Navbar superior de contexto)
+- `src/components/admin/metric-card.tsx` (Card de métrica limpo)
+- `src/components/admin/recent-sales.tsx` (Lista ou tabela administrativa simplificada)
