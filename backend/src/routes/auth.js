@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const { Op } = require('sequelize');
 const { User, Plan, TokenBlocklist } = require('../models');
-const { authenticateToken } = require('../middlewares/auth');
+const { authenticateToken, addToBlocklistCache } = require('../middlewares/auth');
 const admin = require('../config/firebaseAdmin');
 
 const crypto = require('crypto');
@@ -452,10 +452,16 @@ router.post('/logout', authenticateToken, async (req, res) => {
 
     if (token) {
       const decoded = jwt.decode(token);
+      const expiresAt = decoded?.exp
+        ? new Date(decoded.exp * 1000)
+        : new Date(Date.now() + 24 * 60 * 60 * 1000);
+
       await TokenBlocklist.create({
         token,
-        expiresAt: new Date(decoded.exp * 1000)
+        expires_at: expiresAt
       });
+
+      addToBlocklistCache(token);
     }
 
     res.json({

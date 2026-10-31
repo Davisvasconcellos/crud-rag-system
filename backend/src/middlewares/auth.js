@@ -144,7 +144,14 @@ const requireRole = (...roles) => {
   };
 };
 
+const addToBlocklistCache = (token) => {
+  if (token) {
+    blocklistCache.set(token, true);
+  }
+};
+
 module.exports = {
   authenticateToken,
-  requireRole
+  requireRole,
+  addToBlocklistCache
 };

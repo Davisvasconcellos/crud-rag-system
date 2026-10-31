@@ -18,8 +18,10 @@ import {
   Search,
   X,
   Puzzle,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/auth-context";
 
 export const UI_ELEMENTS_CATEGORIES: {
   category: string;
@@ -128,6 +130,7 @@ import { useSidebar } from "@/contexts/sidebar-context";
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const { mobileOpen, setMobileOpen, collapsed, setCollapsed } = useSidebar();
+  const { user, logout } = useAuth();
   const [uiElementsOpen, setUiElementsOpen] = useState(true);
   const [filterQuery, setFilterQuery] = useState("");
   const [pluginsOpen, setPluginsOpen] = useState(false);
@@ -587,21 +590,45 @@ export const Sidebar: React.FC = () => {
         <div className="p-3 border-t border-zinc-100 dark:border-zinc-800 shrink-0">
           <div
             className={cn(
-              "flex items-center gap-3 rounded-lg p-2 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/60 dark:border-zinc-800",
-              collapsed ? "justify-start lg:justify-center" : "justify-start"
+              "flex items-center gap-2.5 rounded-xl p-2 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/60 dark:border-zinc-800",
+              collapsed ? "justify-start lg:justify-center" : "justify-between"
             )}
           >
-            <div className="h-8 w-8 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs shrink-0">
-              DV
+            <div className="flex items-center gap-2.5 min-w-0">
+              {user?.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.avatar_url}
+                  alt={user.name || "User"}
+                  className="h-8 w-8 rounded-full object-cover shrink-0 border border-emerald-500/30"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+                </div>
+              )}
+              <div className={cn("min-w-0 flex-1", collapsed ? "lg:hidden" : "block")}>
+                <p className="truncate text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                  {user?.name || "Usuário"}
+                </p>
+                <p className="truncate text-[10px] text-zinc-500 dark:text-zinc-400 capitalize">
+                  {user?.role ? `${user.role} · Conectado` : "Conectado"}
+                </p>
+              </div>
             </div>
-            <div className={cn("min-w-0 flex-1", collapsed ? "lg:hidden" : "block")}>
-              <p className="truncate text-xs font-semibold text-zinc-900 dark:text-zinc-100">
-                Davis Vasconcellos
-              </p>
-              <p className="truncate text-[10px] text-zinc-500 dark:text-zinc-400">
-                Gestor Imobiliário / Tenant-01
-              </p>
-            </div>
+
+            {/* Botão de Logout */}
+            <button
+              type="button"
+              onClick={() => logout()}
+              title="Sair da Conta"
+              className={cn(
+                "p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors shrink-0 cursor-pointer",
+                collapsed ? "lg:hidden" : "block"
+              )}
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </aside>

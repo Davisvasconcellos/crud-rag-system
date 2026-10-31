@@ -2,6 +2,7 @@ import React from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { SidebarProvider } from "@/contexts/sidebar-context";
+import { AuthGuard } from "@/components/auth/auth-guard";
 import { Toaster } from "sonner";
 
 export default function AdminLayout({
@@ -10,7 +11,8 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
+    <AuthGuard>
+      <SidebarProvider>
       <div className="flex h-dvh w-full overflow-hidden bg-zinc-50/60 dark:bg-zinc-950 relative">
         {/* Sidebar (Mobile Drawer + Desktop Persistent) */}
         <React.Suspense
@@ -35,5 +37,6 @@ export default function AdminLayout({
         <Toaster position="bottom-right" richColors />
       </div>
     </SidebarProvider>
+    </AuthGuard>
   );
 }

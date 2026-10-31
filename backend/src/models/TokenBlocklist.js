@@ -18,6 +18,15 @@ const TokenBlocklist = sequelize.define('TokenBlocklist', {
     type: DataTypes.DATE,
     allowNull: false
   },
+  expiresAt: {
+    type: DataTypes.VIRTUAL,
+    get() {
+      return this.getDataValue('expires_at');
+    },
+    set(value) {
+      this.setDataValue('expires_at', value);
+    }
+  },
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
