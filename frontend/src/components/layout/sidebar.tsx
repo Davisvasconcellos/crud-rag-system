@@ -19,6 +19,7 @@ import {
   X,
   Puzzle,
   LogOut,
+  Home,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
@@ -149,6 +150,7 @@ export const Sidebar: React.FC = () => {
     {
       title: "Imobiliária",
       items: [
+        { label: "Início", href: "/home", icon: Home },
         { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
         { label: "Imóveis", href: "/properties", icon: Building2 },
         { label: "Novo Imóvel", href: "/properties/new", icon: PlusCircle },
