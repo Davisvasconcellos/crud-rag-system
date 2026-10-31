@@ -22,6 +22,14 @@ import {
 } from "lucide-react";
 
 export default function HomePage() {
+  return (
+    <AuthGuard>
+      <HomeContent />
+    </AuthGuard>
+  );
+}
+
+function HomeContent() {
   const { user, logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDark, setIsDark] = useState(false);
@@ -70,8 +78,7 @@ export default function HomePage() {
   };
 
   return (
-    <AuthGuard>
-      <div className="min-h-screen bg-zinc-50/80 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col">
+    <div className="min-h-screen bg-zinc-50/80 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col">
         {/* Topbar Minimalista */}
         <header className="sticky top-0 z-30 border-b border-zinc-200 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -263,6 +270,5 @@ export default function HomePage() {
           </div>
         </main>
       </div>
-    </AuthGuard>
   );
 }
