@@ -144,6 +144,85 @@ const requireRole = (...roles) => {
   };
 };
 
+// Middleware para verificar acesso a módulos (ex: crm, financial, rag, rentals, commissions)
+const requireModule = (moduleSlug) => {
+  return async (req, res, next) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: 'Não autenticado' });
+      }
+
+      // Master e Admin têm acesso irrestrito
+      const highPrivilegeRoles = ['admin', 'master'];
+      if (highPrivilegeRoles.includes(req.user.role)) {
+        return next();
+      }
+
+      const { Store, StoreMember } = require('../models');
+
+      const headerStoreId = req.headers['x-store-id'] || req.headers['x-context-store-id'];
+      const storeId = headerStoreId || req.query.store_id || req.body.store_id || null;
+
+      if (storeId) {
+        const store = await Store.findOne({ where: { id_code: String(storeId) }, attributes: ['id', 'owner_id'] });
+        if (store) {
+          if (store.owner_id === req.user.userId) {
+            return next();
+          }
+
+          const member = await StoreMember.findOne({
+            where: { store_id: store.id, user_id: req.user.userId, status: 'active' },
+            attributes: ['role', 'permissions']
+          });
+
+          if (member) {
+            if (member.role === 'manager') {
+              return next();
+            }
+
+            const memberPermissions = Array.isArray(member.permissions) ? member.permissions : [];
+            if (
+              memberPermissions.includes(`${moduleSlug}:read`) ||
+              memberPermissions.includes(`${moduleSlug}:write`) ||
+              memberPermissions.includes(moduleSlug)
+            ) {
+              return next();
+            }
+          }
+        }
+      } else {
+        const memberships = await StoreMember.findAll({
+          where: { user_id: req.user.userId, status: 'active' },
+          attributes: ['role', 'permissions'],
+          limit: 50
+        });
+
+        const hasModuleAccess = memberships.some((m) => {
+          if (m.role === 'manager') return true;
+          const memberPermissions = Array.isArray(m.permissions) ? m.permissions : [];
+          return (
+            memberPermissions.includes(`${moduleSlug}:read`) ||
+            memberPermissions.includes(`${moduleSlug}:write`) ||
+            memberPermissions.includes(moduleSlug)
+          );
+        });
+
+        if (hasModuleAccess) {
+          return next();
+        }
+      }
+
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: `Acesso negado ao módulo '${moduleSlug}'. Verifique sua assinatura ou permissões.`
+      });
+    } catch (err) {
+      console.error('requireModule error:', err);
+      return res.status(500).json({ error: 'Erro ao verificar permissão do módulo' });
+    }
+  };
+};
+
 const addToBlocklistCache = (token) => {
   if (token) {
     blocklistCache.set(token, true);
@@ -153,5 +232,7 @@ const addToBlocklistCache = (token) => {
 module.exports = {
   authenticateToken,
   requireRole,
+  requireModule,
   addToBlocklistCache
 };
+

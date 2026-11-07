@@ -2,13 +2,39 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const { Op } = require('sequelize');
-const { User, Plan, TokenBlocklist } = require('../models');
+const { User, Plan, TokenBlocklist, Organization, Store, StoreMember } = require('../models');
 const { authenticateToken, addToBlocklistCache } = require('../middlewares/auth');
 const admin = require('../config/firebaseAdmin');
 
 const crypto = require('crypto');
 
 const router = express.Router();
+
+const userAuthIncludes = [
+  {
+    model: Plan,
+    as: 'plan',
+    attributes: ['id', 'name', 'description', 'price']
+  },
+  {
+    model: Organization,
+    as: 'ownedOrganizations',
+    attributes: ['id_code', 'name', 'plan_tier', 'logo_url', 'banner_url'],
+    include: [{ model: Store, as: 'stores', attributes: ['id_code', 'name', 'slug', 'logo_url', 'banner_url', 'config'] }]
+  },
+  {
+    model: StoreMember,
+    as: 'storeMemberships',
+    where: { status: 'active' },
+    required: false,
+    include: [{
+      model: Store,
+      as: 'store',
+      attributes: ['id_code', 'name', 'slug', 'logo_url', 'banner_url'],
+      include: [{ model: Organization, as: 'organization', attributes: ['id_code', 'name', 'logo_url', 'banner_url'] }]
+    }]
+  }
+];
 
 /**
  * @swagger
@@ -60,13 +86,7 @@ router.post('/login', [
     // Buscar usuário
     const user = await User.findOne({
       where: { email },
-      include: [
-        {
-          model: Plan,
-          as: 'plan',
-          attributes: ['id', 'name', 'description', 'price']
-        }
-      ]
+      include: userAuthIncludes
     });
 
     if (!user) {
@@ -155,16 +175,8 @@ router.post('/google', [
       });
     }
 
-    const include = [
-      {
-        model: Plan,
-        as: 'plan',
-        attributes: ['id', 'name', 'description', 'price']
-      }
-    ];
-
     // Procura por google_uid (preferencial) ou legado google_id
-    let user = await User.findOne({ where: { [Op.or]: [{ google_uid: sub }, { google_id: sub }] }, include });
+    let user = await User.findOne({ where: { [Op.or]: [{ google_uid: sub }, { google_id: sub }] }, include: userAuthIncludes });
 
     if (!user) {
       const userByEmail = await User.findOne({ where: { email } });
@@ -178,7 +190,7 @@ router.post('/google', [
           avatar_url: userByEmail.avatar_url || picture || null
         });
 
-        user = await User.findOne({ where: { id: userByEmail.id }, include });
+        user = await User.findOne({ where: { id: userByEmail.id }, include: userAuthIncludes });
       } else {
         const randomPassword = crypto.randomBytes(32).toString('hex');
         const created = await User.create({
@@ -192,7 +204,7 @@ router.post('/google', [
           email_verified: !!email_verified
         });
 
-        user = await User.findOne({ where: { id: created.id }, include });
+        user = await User.findOne({ where: { id: created.id }, include: userAuthIncludes });
       }
     }
 
@@ -348,13 +360,7 @@ router.get('/me', authenticateToken, async (req, res) => {
   try {
     // O middleware de auth já adicionou o usuário ao req
     const user = await User.findByPk(req.user.userId, {
-      include: [
-        {
-          model: Plan,
-          as: 'plan',
-          attributes: ['id', 'name', 'description', 'price']
-        }
-      ]
+      include: userAuthIncludes
     });
 
     if (!user) {

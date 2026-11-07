@@ -30,6 +30,14 @@ const { Op } = require('sequelize');
 // Import routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const organizationRoutes = require('./routes/organizations');
+const storeRoutes = require('./routes/stores');
+const storeInviteRoutes = require('./routes/storeInvites');
+const storeInvitesPublicRoutes = require('./routes/storeInvitesPublic');
+const partiesRoutes = require('./routes/parties');
+const finCommissionsRoutes = require('./routes/finCommissions');
+const finRecurrencesRoutes = require('./routes/finRecurrences');
+const sysModulesRoutes = require('./routes/sysModules');
 const { uploadRouter } = require('./routes/upload');
 const filesRoutes = require('./routes/files');
 const pdfRoutes = require('./routes/pdf');
@@ -136,6 +144,14 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 // Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/organizations', organizationRoutes);
+app.use('/api/v1/stores', storeRoutes);
+app.use('/api/v1/store-invites', storeInviteRoutes);
+app.use('/api/public/v1/store-invites', storeInvitesPublicRoutes);
+app.use('/api/v1/parties', partiesRoutes);
+app.use('/api/v1/fin-commissions', finCommissionsRoutes);
+app.use('/api/v1/fin-recurrences', finRecurrencesRoutes);
+app.use('/api/v1/sys-modules', sysModulesRoutes);
 app.use('/api/v1/files', filesRoutes);
 app.use('/api/v1/pdf', pdfRoutes);
 
